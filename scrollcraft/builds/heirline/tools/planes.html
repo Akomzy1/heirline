@@ -1,0 +1,133 @@
+<!doctype html><meta charset="utf-8"><body>
+<script>
+// Cuts out/01-hero.png (3840x2160) into: sky.png (clean, opaque), mid.png (lagoon+city, alpha),
+// fg.png (terrace, alpha, extended down by mirror), lights.png (warm highlights, alpha).
+const W = 3840, H = 2160, EXT = 900;              // fg gets EXT px of mirrored floor below
+const railY = x => 1987 - 0.2016 * x;             // fitted top edge of the left balustrade cap
+const PILLAR_X = 2545, PILLAR_TOP = 1388, BOX_X = 3000, BOX_Y = 1300, WALL_X = 3445;
+const lantern = [[2849,856],[2832,872],[2840,905],[2736,940],[2738,962],[2755,985],[2763,995],[2748,1060],
+  [2741,1175],[2750,1240],[2763,1285],[2755,1298],[2742,1340],[2727,1380],[2974,1380],[2962,1340],
+  [2950,1298],[2939,1285],[2955,1235],[2966,1164],[2960,1060],[2950,995],[2958,985],[2970,962],[2972,940],[2866,905],[2872,872]];
+
+function inPoly(x, y, p) { let c = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
+  const [xi, yi] = p[i], [xj, yj] = p[j];
+  if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c; } return c; }
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const smooth = (e0, e1, v) => { const t = clamp((v - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
+
+async function run(src) {
+  const img = new Image(); img.src = src; await img.decode();
+  const cv = new OffscreenCanvas(W, H), cx = cv.getContext('2d'); cx.drawImage(img, 0, 0);
+  const d = cx.getImageData(0, 0, W, H).data;
+  const px = (x, y) => (y * W + x) * 4;
+
+  // per-row sky model: median of a clean sky band
+  const sky = new Float32Array(H * 3);
+  for (let y = 0; y < H; y++) { const r = [], g = [], b = [];
+    for (let x = 2250; x <= 2450; x += 4) { const i = px(x, Math.min(y, 1250)); r.push(d[i]); g.push(d[i+1]); b.push(d[i+2]); }
+    const med = a => a.sort((m, n) => m - n)[a.length >> 1];
+    sky[y*3] = med(r); sky[y*3+1] = med(g); sky[y*3+2] = med(b); }
+
+  // foreground alpha
+  const A = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    let a = 0;
+    if (x < PILLAR_X) a = smooth(railY(x) - 1.5, railY(x) + 1.5, y);
+    else if (y >= PILLAR_TOP) a = 1;
+    if (x >= BOX_X && y >= BOX_Y) a = 1;
+    if (x >= WALL_X) a = 1;
+    if (a < 1 && x >= BOX_X && y < BOX_Y) {
+      const i = px(x, y), dr = d[i]-sky[y*3], dg = d[i+1]-sky[y*3+1], db = d[i+2]-sky[y*3+2];
+      a = Math.max(a, smooth(14, 34, Math.sqrt(dr*dr + dg*dg + db*db)));
+    }
+    if (a < 1 && x > 2700 && x < 2990 && y > 840 && y < 1400 && inPoly(x, y, lantern)) {
+      // inside the traced outline: keep the glass core whole, classify the rim against the sky
+      const core = x > 2760 && x < 2945 && y > 995 && y < 1290;
+      const i = px(x, y), dr = d[i]-sky[y*3], dg = d[i+1]-sky[y*3+1], db = d[i+2]-sky[y*3+2];
+      a = Math.max(a, core ? 1 : smooth(10, 28, Math.sqrt(dr*dr + dg*dg + db*db)));
+    }
+    A[y * W + x] = a;
+  }
+  // 1px soften on the classified box to kill speckle
+  const A2 = A.slice();
+  for (let y = 1; y < BOX_Y; y++) for (let x = BOX_X; x < WALL_X; x++) {
+    let s = 0; for (let k = -1; k <= 1; k++) for (let l = -1; l <= 1; l++) s += A[(y+k)*W + x + l]; A2[y*W+x] = s / 9; }
+
+  // FG canvas (extended)
+  const fg = new OffscreenCanvas(W, H + EXT), fx = fg.getContext('2d'), fd = fx.createImageData(W, H + EXT);
+  // below the frame: the floor runs on briefly, then falls into ink shadow (#0B1220)
+  const INK = [11, 18, 32];
+  for (let y = 0; y < H + EXT; y++) {
+    const sy = Math.min(y, H - 1);
+    const t = y < H ? 0.92 * smooth(H - 300, H, y) : 1;     // the floor falls into shadow inside the frame; ink below
+    for (let x = 0; x < W; x++) { const i = px(x, sy), o = (y * W + x) * 4;
+      fd.data[o] = d[i] * (1 - t) + INK[0] * t; fd.data[o+1] = d[i+1] * (1 - t) + INK[1] * t; fd.data[o+2] = d[i+2] * (1 - t) + INK[2] * t;
+      fd.data[o+3] = y < H ? 255 * A2[sy * W + x] : 255; } }
+  fx.putImageData(fd, 0, 0);
+
+  // dilated mask for inpainting the background under fg (sky rows only)
+  const R = 46, M = new Uint8Array(W * H);
+  for (let y = 0; y < BOX_Y + R; y++) for (let x = 2650; x < W; x++) if (A2[y*W+x] > 0.02)
+    for (let k = -R; k <= R; k += 3) { const yy = y + k; if (yy >= 0 && yy < H) for (let l = -R; l <= R; l += 3) { const xx = x + l; if (xx >= 0 && xx < W) M[yy*W+xx] = 1; } }
+
+  // SKY: push-pull fill of the region under the foreground, from the surrounding real sky
+  const X0 = 2560, RW = W - X0, RH = 1340;
+  let lv = [{ w: RW, h: RH, c: new Float32Array(RW * RH * 3), k: new Float32Array(RW * RH) }];
+  for (let y = 0; y < RH; y++) for (let x = 0; x < RW; x++) {
+    const j = y * RW + x, i = px(x + X0, y), known = (M[y*W + x + X0] || A2[y*W + x + X0] > 0.01) ? 0 : 1;
+    lv[0].k[j] = known; lv[0].c[j*3] = d[i] * known; lv[0].c[j*3+1] = d[i+1] * known; lv[0].c[j*3+2] = d[i+2] * known; }
+  while (lv[lv.length - 1].w > 2 && lv[lv.length - 1].h > 2) {   // pull
+    const a = lv[lv.length - 1], w = a.w >> 1, h = a.h >> 1, b = { w, h, c: new Float32Array(w * h * 3), k: new Float32Array(w * h) };
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let s0 = 0, s1 = 0, s2 = 0, kk = 0;
+      for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) { const j = (2*y+dy) * a.w + 2*x + dx; s0 += a.c[j*3]; s1 += a.c[j*3+1]; s2 += a.c[j*3+2]; kk += a.k[j]; }
+      const j = y * w + x; b.k[j] = Math.min(1, kk); const n = kk > 0 ? kk : 1; b.c[j*3] = s0 / n * b.k[j]; b.c[j*3+1] = s1 / n * b.k[j]; b.c[j*3+2] = s2 / n * b.k[j]; }
+    lv.push(b); }
+  for (let l = lv.length - 2; l >= 0; l--) {                          // push
+    const a = lv[l], b = lv[l + 1];
+    for (let y = 0; y < a.h; y++) for (let x = 0; x < a.w; x++) { const j = y * a.w + x; if (a.k[j] >= 1) continue;
+      const fx = clamp((x + 0.5) / 2 - 0.5, 0, b.w - 1), fy = clamp((y + 0.5) / 2 - 0.5, 0, b.h - 1);
+      const x0 = Math.floor(fx), y0 = Math.floor(fy), x1 = Math.min(b.w - 1, x0 + 1), y1 = Math.min(b.h - 1, y0 + 1), tx = fx - x0, ty = fy - y0, f = 1 - a.k[j];
+      for (let ch = 0; ch < 3; ch++) {
+        const v = (b.c[(y0*b.w+x0)*3+ch] * (1-tx) + b.c[(y0*b.w+x1)*3+ch] * tx) * (1-ty) + (b.c[(y1*b.w+x0)*3+ch] * (1-tx) + b.c[(y1*b.w+x1)*3+ch] * tx) * ty;
+        a.c[j*3+ch] = a.c[j*3+ch] + f * v; }
+      a.k[j] = 1; } }
+  // light 5x5 blur of the filled values only, then compose with grain
+  const F = lv[0].c, FB = F.slice();
+  for (let y = 2; y < RH - 2; y++) for (let x = 2; x < RW - 2; x++) { const j = y * RW + x;
+    if (M[y*W + x + X0] || A2[y*W + x + X0] > 0.01) for (let ch = 0; ch < 3; ch++) { let s = 0;
+      for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) s += F[((y+dy) * RW + x + dx) * 3 + ch]; FB[j*3+ch] = s / 25; } }
+  const sk = new OffscreenCanvas(W, H), sx = sk.getContext('2d'), sd = sx.createImageData(W, H);
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = px(x, y);
+    let r = d[i], g = d[i+1], b = d[i+2];
+    if (x >= X0 && y < RH && (M[y*W+x] || A2[y*W+x] > 0.01)) { const j = (y * RW + x - X0) * 3, n = (rnd() - 0.5) * 4;
+      r = FB[j] + n; g = FB[j+1] + n; b = FB[j+2] + n; }
+    sd.data[i] = r; sd.data[i+1] = g; sd.data[i+2] = b; sd.data[i+3] = 255; }
+  sx.putImageData(sd, 0, 0);
+
+  // MID: the sky canvas, alpha ramps in above the skyline
+  const mid = new OffscreenCanvas(W, H), mx = mid.getContext('2d'), md = mx.createImageData(W, H);
+  for (let y = 0; y < H; y++) { const a = 255 * smooth(930, 1090, y);
+    for (let x = 0; x < W; x++) { const i = px(x, y); md.data[i] = sd.data[i]; md.data[i+1] = sd.data[i+1]; md.data[i+2] = sd.data[i+2]; md.data[i+3] = a; } }
+  mx.putImageData(md, 0, 0);
+
+  // LIGHTS: warm highlights of the city and reflections only (excludes fg)
+  const li = new OffscreenCanvas(W, H), lx = li.getContext('2d'), ld = lx.createImageData(W, H);
+  for (let y = 1050; y < 2000; y++) for (let x = 0; x < W; x++) { const i = px(x, y);
+    if (A2[y*W+x] > 0.01) continue;
+    const L = 0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2], warm = d[i] - d[i+2];
+    const a = smooth(118, 190, L) * smooth(10, 50, warm);
+    ld.data[i] = Math.min(255, d[i] * 1.15); ld.data[i+1] = Math.min(255, d[i+1] * 1.05); ld.data[i+2] = d[i+2]; ld.data[i+3] = 255 * a; }
+  lx.putImageData(ld, 0, 0);
+
+  const out = {};
+  for (const [k, c] of Object.entries({ sky: sk, mid, fg, lights: li })) {
+    const blob = await c.convertToBlob({ type: 'image/png' });
+    const buf = new Uint8Array(await blob.arrayBuffer()); let s = '';
+    for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+    out[k] = btoa(s);
+  }
+  return out;
+}
+window.run = run;
+</script>

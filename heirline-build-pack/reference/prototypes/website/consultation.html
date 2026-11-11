@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book a private consultation Â· Heirline</title>
+<meta name="description" content="A private conversation about your family and how a verified register could serve it. Held by senior staff only, by appointment.">
+<meta name="theme-color" content="#E8E0CF">
+<link rel="icon" href="assets/heirline-seal-navy.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Geist+Mono:wght@400&family=Geist:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="scrollcraft.css">
+<link rel="stylesheet" href="css/heirline.css">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/page.css">
+</head>
+<body class="day">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header on-day" data-header>
+  <div class="wrap site-header__in">
+    <a class="brand" href="index.html" aria-label="Heirline, home">
+      <img class="is-ivory" src="assets/heirline-horizontal-ivory.svg" alt="" width="190" height="77">
+      <img class="is-navy" src="assets/heirline-horizontal-navy.svg" alt="" width="190" height="77">
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#services">Services</a>
+      <a href="#">For the diaspora</a>
+      <a href="index.html#security">Security and privacy</a>
+      <a href="index.html#insights">Insights</a>
+    </nav>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-menu-open>Menu <span class="menu-btn__bars" aria-hidden="true"></span></button>
+  </div>
+</header>
+
+<div class="menu evening" id="menu" role="dialog" aria-modal="true" aria-label="Menu" data-menu>
+  <div class="menu__top"><img src="assets/heirline-horizontal-ivory.svg" alt="Heirline" width="190" height="77"><button class="menu__close" type="button" data-menu-close>Close</button></div>
+  <nav aria-label="Main">
+    <a href="index.html#how">How it works</a><a href="index.html#services">Services</a><a href="#">For the diaspora</a><a href="#">For partners</a><a href="index.html#security">Security and privacy</a><a href="index.html#insights">Insights</a>
+  </nav>
+  <div class="menu__foot"><p class="mono">Lagos Â· London</p></div>
+</div>
+
+<main id="main">
+  <section id="consultation" class="close day" data-theme="day" style="padding-top: calc(var(--header-h) + 56px)">
+    <div class="wrap close__grid">
+      <div class="letter" data-letter>
+        <div class="letter__head">
+          <img src="assets/heirline-horizontal-navy.svg" alt="Heirline" width="200" height="81">
+          <p class="mono" data-today></p>
+        </div>
+        <p class="label">In confidence</p>
+        <h1 class="h1">Book a private consultation</h1>
+        <p class="lede" data-letter-intro>A private conversation about your family and how a verified register could serve it. There is no obligation.</p>
+        <form class="letter__form" method="post" action="#" novalidate data-form>
+          <div class="letter__row">
+            <div class="field"><label for="f-name">How should we address you?</label><input id="f-name" name="name" autocomplete="name" required><p class="err" id="f-name-err" hidden>Please tell us how to address you.</p></div>
+            <div class="field"><label for="f-contact">Email or telephone</label><input id="f-contact" name="contact" autocomplete="email" required><p class="err" id="f-contact-err" hidden>Please give us one way to reach you.</p></div>
+          </div>
+          <div class="letter__row">
+            <div class="field"><label for="f-who">You are</label>
+              <select id="f-who" name="who"><option>The head of the family</option><option>A family member</option><option>An executor</option><option>An adviser to the family</option></select></div>
+            <div class="field"><label for="f-where">Where are you now?</label>
+              <select id="f-where" name="where"><option>Nigeria</option><option>United Kingdom</option><option>United States</option><option>United Arab Emirates</option><option>Elsewhere</option></select></div>
+          </div>
+          <div class="letter__row">
+            <div class="field"><label for="f-how">How should we reach you?</label>
+              <select id="f-how" name="how"><option>Email</option><option>Telephone</option><option>WhatsApp</option><option>A video call</option></select></div>
+            <div class="field"><label for="f-when">A good time</label>
+              <select id="f-when" name="when"><option>Morning, Lagos time</option><option>Afternoon, Lagos time</option><option>Evening, Lagos time</option></select></div>
+          </div>
+          <fieldset class="field"><legend>What you would like to discuss</legend><div class="chips" data-chips></div></fieldset>
+          <div class="field consent">
+            <label class="consent__box"><input type="checkbox" id="f-consent" name="consent" required><span>I agree to Heirline holding these details to arrange a consultation, as described in the <a href="#">privacy notice</a>.</span></label>
+            <p class="err" id="f-consent-err" hidden>Please confirm you are content for us to hold these details.</p>
+          </div>
+          <div class="letter__send">
+            <button class="btn btn--primary" type="submit">Book a private consultation</button>
+            <p class="hint">Consultations are held by senior staff only, by appointment. Please do not include account numbers, values or locations.</p>
+          </div>
+        </form>
+        <div class="letter__done" role="status" tabindex="-1" hidden data-done>
+          <p class="h2">Thank you. A member of our team will contact you discreetly within one working day.</p>
+          <p class="body">Nothing you have shared leaves Heirline, and our messages never carry details of what your family owns.</p>
+          <p class="mono">Prototype: this form does not send. In the build it posts to the consultation service.</p>
+        </div>
+      </div>
+      <aside class="close__reg evening" aria-label="What happens next">
+        <div class="close__seal"><img src="assets/heirline-seal-brass.svg" alt="" width="96" height="96"></div>
+        <p class="label">What happens next</p>
+        <ol class="next" style="border-top-color: var(--ink-700)">
+          <li><div><p class="h3">We write to you</p><p class="body">To arrange a time, by the means you prefer. Our messages never carry names, amounts or details of what you own.</p></div></li>
+          <li><div><p class="h3">A private conversation</p><p class="body">With a senior member of staff, in person in Lagos or London, or by video call.</p></div></li>
+          <li><div><p class="h3">A written proposal</p><p class="body">What we would do, what we would need from you, and a fixed fee. There is no obligation.</p></div></li>
+        </ol>
+        <p class="close__note ui">Heirline will never ask you to send money, passwords or one-time codes.</p>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer day" data-theme="day">
+  <div class="wrap">
+    <div class="site-footer__base" style="margin-top: 0"><span>Â© 2026 Heirline Nigeria Limited Â· 26 Dipeolu Street, by Allen Avenue, Awolowo Way, Ikeja, Lagos</span><span>Lagos Â· London</span><a class="push" href="#">Privacy notice</a><a href="#">Terms of use</a></div>
+  </div>
+</footer>
+
+<script src="scrollcraft.js"></script>
+<script src="js/heirline.js"></script>
+<script>ScrollCraft.mount(document.body); HL.mountForm(document.querySelector('#consultation'));</script>
+</body>
+</html>

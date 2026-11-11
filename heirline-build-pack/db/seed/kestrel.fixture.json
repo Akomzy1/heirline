@@ -1,0 +1,340 @@
+{
+  "_comment": "SYNTHETIC. Fictional people and numbers. Never real client data. Source: reference/specs/Heirline_Prototype_Prompts.md P0.",
+  "today": "2026-11-09",
+  "family": {
+    "code_name": "KESTREL"
+  },
+  "persons": [
+    {
+      "key": "principal",
+      "role": "principal",
+      "ui_name": "Chief A.",
+      "synthetic_full_name": "Adekunle Olufemi Bamgbose",
+      "age": 67,
+      "aliases": [
+        "A. O. Bamgbose",
+        "Kunle Bamgbose",
+        "Adekunle Bamgbose-Ojo"
+      ],
+      "note": "Business owner, Lagos"
+    },
+    {
+      "key": "spouse",
+      "role": "spouse",
+      "ui_name": "Mrs F."
+    },
+    {
+      "key": "tolu",
+      "role": "heir",
+      "ui_name": "Tolu",
+      "access_level": "L2",
+      "lives": "London",
+      "is_executor": true,
+      "note": "Eldest son; level: categories only"
+    },
+    {
+      "key": "kemi",
+      "role": "heir",
+      "ui_name": "Kemi",
+      "access_level": "L1",
+      "lives": "Lagos",
+      "note": "Daughter; level: plan exists + who to call"
+    },
+    {
+      "key": "dayo",
+      "role": "heir",
+      "ui_name": "Dayo",
+      "access_level": "L0",
+      "note": "Youngest son; level: nothing yet"
+    }
+  ],
+  "partners": [
+    {
+      "type": "law_firm",
+      "name": "Adeyemi & Co."
+    },
+    {
+      "type": "trustee",
+      "name": "Crestfield Trustees"
+    }
+  ],
+  "staff": [
+    {
+      "key": "bisi",
+      "role": "analyst",
+      "display_name": "Bisi"
+    },
+    {
+      "key": "verifier",
+      "role": "verifier",
+      "display_name": "O. Akomolede",
+      "ican_ref_masked": "ICAN •••• 3318"
+    },
+    {
+      "key": "admin",
+      "role": "admin",
+      "display_name": "Admin"
+    },
+    {
+      "key": "dpo",
+      "role": "dpo",
+      "display_name": "Data Protection Officer"
+    }
+  ],
+  "engagements": [
+    {
+      "code_name": "KESTREL",
+      "product": "health_check",
+      "stage": "verification",
+      "analyst": "bisi",
+      "verifier": "verifier"
+    },
+    {
+      "code_name": "OSPREY",
+      "product": "trace",
+      "stage": "discovery"
+    },
+    {
+      "code_name": "HERON",
+      "product": "retainer",
+      "stage": "delivered"
+    },
+    {
+      "code_name": "MERLIN",
+      "product": "health_check",
+      "stage": "onboarding"
+    },
+    {
+      "code_name": "PLOVER",
+      "product": "heir",
+      "stage": "onboarding"
+    }
+  ],
+  "assets": [
+    {
+      "type": "land_parcel",
+      "key": "lekki-1",
+      "locality": "Lekki Phase 1",
+      "state": "Lagos",
+      "title_doc_type": "registered_c_of_o_or_consent",
+      "charting_result": "free",
+      "occupation_status": "owner",
+      "expected_band": "low",
+      "expected_score": null,
+      "status": "verified"
+    },
+    {
+      "type": "land_parcel",
+      "key": "lekki-2",
+      "locality": "Lekki (parcel 2)",
+      "state": "Lagos",
+      "title_doc_type": "unregistered_deed",
+      "charting_result": "free",
+      "occupation_status": "unknown",
+      "name_mismatch_on_title": true,
+      "expected_band": "high",
+      "expected_score": 58,
+      "status": "evidenced",
+      "note": "Prototype rule hits: +30 Unregistered deed, +10 Occupation unknown, +18 Name mismatch. NOTE: the TRD placeholder weights give +20 for a name mismatch; the prototype shows +18. Weights are placeholders to be calibrated (TRD §10.2, decision 6). The golden test for this parcel must use the calibrated pack, not the prototype's figure."
+    },
+    {
+      "type": "land_parcel",
+      "key": "ibadan-akobo",
+      "locality": "Akobo, Ibadan",
+      "state": "Oyo",
+      "title_doc_type": "survey_plan_only",
+      "charting_result": "free",
+      "occupation_status": "third_party",
+      "expected_band": "moderate",
+      "status": "evidenced",
+      "note": "Encroachment alert open (portal flow P3). V1 monitoring; MVP shows it as a finding only."
+    },
+    {
+      "type": "land_parcel",
+      "key": "abuja-lokogoma",
+      "locality": "Lokogoma, Abuja",
+      "state": "FCT",
+      "title_doc_type": "registered_c_of_o_or_consent",
+      "charting_result": "free",
+      "occupation_status": "owner",
+      "expected_band": "low",
+      "status": "verified",
+      "note": "Governor's Consent. FCT pack is V1; MVP records it without scoring rules for FCT (band unscored until the pack exists)."
+    },
+    {
+      "type": "land_parcel",
+      "key": "ijebu-ode",
+      "locality": "Ijebu-Ode (family land)",
+      "state": "Ogun",
+      "title_doc_type": "receipt_or_family_conveyance_only",
+      "charting_result": null,
+      "occupation_status": "unknown",
+      "expected_band": "unscored",
+      "status": "claimed",
+      "note": "Unscored until charting returns (fail closed). Ogun pack is V1."
+    },
+    {
+      "type": "listed_shares",
+      "key": "shares-1",
+      "institution": "Registrar A",
+      "status": "verified"
+    },
+    {
+      "type": "listed_shares",
+      "key": "shares-2",
+      "institution": "Registrar A",
+      "status": "verified"
+    },
+    {
+      "type": "listed_shares",
+      "key": "shares-3",
+      "institution": "Registrar A",
+      "status": "verified"
+    },
+    {
+      "type": "listed_shares",
+      "key": "shares-4",
+      "institution": "Registrar B",
+      "status": "verified"
+    },
+    {
+      "type": "listed_shares",
+      "key": "shares-5",
+      "institution": "Registrar B",
+      "status": "verified"
+    },
+    {
+      "type": "listed_shares",
+      "key": "shares-6",
+      "institution": "Registrar B",
+      "status": "verified"
+    },
+    {
+      "type": "unclaimed_dividend",
+      "key": "dividend-1",
+      "institution": "Registrar A",
+      "status": "verified",
+      "note": "Aggregate identified: ₦18m–₦26m (range only, never a point value)"
+    },
+    {
+      "type": "unclaimed_dividend",
+      "key": "dividend-2",
+      "institution": "Registrar A",
+      "status": "verified",
+      "note": "Aggregate identified: ₦18m–₦26m (range only, never a point value)"
+    },
+    {
+      "type": "unclaimed_dividend",
+      "key": "dividend-3",
+      "institution": "Registrar B",
+      "status": "verified",
+      "note": "Aggregate identified: ₦18m–₦26m (range only, never a point value)"
+    },
+    {
+      "type": "unclaimed_dividend",
+      "key": "dividend-4",
+      "institution": "Registrar B",
+      "status": "verified",
+      "note": "Aggregate identified: ₦18m–₦26m (range only, never a point value)"
+    },
+    {
+      "type": "bank_account",
+      "key": "bank-active-1",
+      "status": "verified"
+    },
+    {
+      "type": "bank_account",
+      "key": "bank-active-2",
+      "status": "verified"
+    },
+    {
+      "type": "bank_account",
+      "key": "bank-active-3",
+      "status": "verified"
+    },
+    {
+      "type": "bank_account",
+      "key": "bank-active-4",
+      "status": "verified"
+    },
+    {
+      "type": "bank_account",
+      "key": "bank-dormant-c",
+      "institution": "Bank C",
+      "status": "verified",
+      "note": "Dormant; match confirmed; claim in progress; masked ref •••• 9102"
+    },
+    {
+      "type": "pension_rsa",
+      "key": "rsa-1",
+      "status": "verified"
+    },
+    {
+      "type": "policy",
+      "key": "policy-1",
+      "status": "verified"
+    },
+    {
+      "type": "policy",
+      "key": "policy-2",
+      "status": "verified"
+    },
+    {
+      "type": "private_stake",
+      "key": "distribution-co-40pct",
+      "status": "verified",
+      "note": "40% stake in a private distribution company"
+    },
+    {
+      "type": "receivable",
+      "key": "relative-loan",
+      "status": "verified",
+      "value_band": "₦35m (documented by a signed note)"
+    },
+    {
+      "type": "offshore",
+      "key": "london-flat",
+      "status": "verified",
+      "note": "Catalogued; UK counsel coordinates"
+    }
+  ],
+  "expected_counts": {
+    "total": 26,
+    "verified": 23,
+    "needs_attention": 3
+  },
+  "vault": {
+    "state": "SEALED",
+    "version": 4,
+    "sealed_on": "2026-10-12",
+    "key_holders": [
+      "principal",
+      "Adeyemi & Co.",
+      "Heirline"
+    ],
+    "cooling_off_demo": {
+      "day": 9,
+      "of": 14
+    }
+  },
+  "land_watch_last_checked": "2026-11-07",
+  "matcher_demo": [
+    {
+      "source": "Bank C dormant list, May 2026",
+      "masked_account": "•••• 9102",
+      "expected": "confirm"
+    },
+    {
+      "source": "Registrar B response",
+      "expected": "queue"
+    },
+    {
+      "source": "synthetic near-miss",
+      "expected": "reject"
+    },
+    {
+      "source": "synthetic weak match",
+      "expected": "needs_more_evidence"
+    }
+  ]
+}

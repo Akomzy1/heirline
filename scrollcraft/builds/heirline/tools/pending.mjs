@@ -1,0 +1,12 @@
+﻿import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { chromium } = require('playwright-core');
+const b = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
+const p = await b.newPage();
+const pend = new Map();
+p.on('request', r => pend.set(r, Date.now()));
+p.on('requestfinished', r => pend.delete(r)); p.on('requestfailed', r => { console.log('FAILED', r.url(), r.failure()?.errorText); pend.delete(r); });
+await p.goto('http://localhost:4500/', { waitUntil: 'load', timeout: 60000 }).catch(e => console.log('goto', e.message.split('\n')[0]));
+await p.waitForTimeout(8000);
+for (const [r] of pend) console.log('PENDING', r.url());
+await b.close();

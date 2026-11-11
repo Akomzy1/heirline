@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# working files from the prototype build (masters are kept in heirline-build-pack/reference/photography/masters)
+scrollcraft/builds/*/out/
+scrollcraft/builds/*/lab/
+
+# original downloads (their contents are unpacked in the repo)
+*.zip
+design-system-export/
+
+# secrets and OS noise
+.env
+.env.*
+.DS_Store
+Thumbs.db
