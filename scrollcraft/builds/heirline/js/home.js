@@ -37,15 +37,35 @@
   var field = scatter.querySelector('[data-field]');
   var reg = scatter.querySelector('[data-register]');
   var regOl = reg.querySelector('[data-ledger]');
-  var DESK = [[0,2,-3,-34,-20],[35,0,2,4,-30],[69,5,-2,36,-14],[5,27,3,-40,6],[39,24,-4,0,10],[69,31,2,40,4],[0,53,-2,-30,26],[34,50,3,-4,34],[67,57,-3,34,30],[21,77,2,-8,40]];
-  var MOB  = [[0,0,-2,-8,-10],[51,2,2,8,-12],[2,18,2,-10,-2],[50,20,-2,10,0],[0,37,-1,-10,6],[51,39,2,10,6],[2,56,2,-8,12],[50,58,-2,10,12],[0,75,-1,-8,16],[51,77,2,8,16]];
+  var DESK = [[0,2,-3,-34,-20],[35,0,2,4,-30],[69,5,-2,36,-14],[5,27,3,-40,6],[39,24,-4,0,10],[69,31,2,40,4],[0,53,-2,-30,26],[34,50,3,-4,34],[67,57,-3,34,30],[16,77,2,-8,40],[52,79,-2,20,42]];
+  var MOB  = [[0,0,-2,-8,-10],[51,1,2,8,-12],[2,15,2,-10,-2],[50,16,-2,10,0],[0,30,-1,-10,6],[51,31,2,10,6],[2,45,2,-8,12],[50,46,-2,10,12],[0,60,-1,-8,16],[51,61,2,8,16],[0,76,-1,-6,20]];
   var slips = HL.catalogue.map(function (c, i) {
-    var b = document.createElement('button');
-    b.type = 'button'; b.className = 'slip'; b.setAttribute('aria-pressed', 'false'); b.dataset.id = c.id;
-    b.innerHTML = '<span class="slip__cat">' + c.cat + '</span><span class="slip__desc">' + c.desc + '</span><span class="slip__ref">' + c.ref + '</span>';
-    b.addEventListener('click', function () { HL.toggle(c.id); });
+    var b, input = null;
+    if (c.other) {
+      // "Something else": a toggle plus a short label of the visitor's own. The words stay in this browser.
+      b = document.createElement('div');
+      b.className = 'slip slip--other'; b.dataset.id = c.id;
+      b.innerHTML = '<button type="button" class="slip__toggle" aria-pressed="false" aria-controls="slip-other-in">' +
+        '<span class="slip__cat">' + c.cat + '</span><span class="slip__desc">Not listed here?</span><span class="slip__ref">Add it in a word or two</span></button>' +
+        '<span class="slip__field" hidden><label class="vh" for="slip-other-in">What is it? A word or two</label>' +
+        '<input id="slip-other-in" maxlength="40" autocomplete="off" placeholder="For example, farmland" aria-describedby="slip-other-hint">' +
+        '<span class="slip__hint" id="slip-other-hint">A word or two is enough. It stays on this page.</span></span>';
+      input = b.querySelector('input');
+      input.value = HL.state.other;
+      input.addEventListener('input', function () { HL.setOther(input.value); });
+      b.querySelector('.slip__toggle').addEventListener('click', function () {
+        HL.toggle(c.id);
+        if (HL.state.marked.indexOf(c.id) !== -1) requestAnimationFrame(function () { input.focus(); });
+      });
+    } else {
+      b = document.createElement('button');
+      b.type = 'button'; b.className = 'slip'; b.setAttribute('aria-pressed', 'false'); b.dataset.id = c.id;
+      b.innerHTML = '<span class="slip__cat">' + c.cat + '</span><span class="slip__desc">' + c.desc + '</span><span class="slip__ref">' + c.ref + '</span>';
+      b.addEventListener('click', function () { HL.toggle(c.id); });
+    }
     field.insertBefore(b, reg);
-    return { el: b, id: c.id, i: i };
+    var focusables = c.other ? [b.querySelector('.slip__toggle'), input] : [b];
+    return { el: b, id: c.id, i: i, input: input, focusables: focusables };
   });
   var mq = matchMedia('(max-width: 860px)');
   function place() {
@@ -77,7 +97,14 @@
     count.textContent = n + (n === 1 ? ' entry' : ' entries');
     note.textContent = ex ? 'This is an example. Scroll back and mark your own, and it will follow you down the page.'
                           : 'Every item starts as a claim. Below, we show what it takes to prove it.';
-    slips.forEach(function (s) { s.el.setAttribute('aria-pressed', st.marked.indexOf(s.id) !== -1 ? 'true' : 'false'); });
+    slips.forEach(function (s) {
+      var on = st.marked.indexOf(s.id) !== -1;
+      if (s.input) {
+        s.el.classList.toggle('is-on', on);
+        s.el.querySelector('.slip__toggle').setAttribute('aria-pressed', on ? 'true' : 'false');
+        s.el.querySelector('.slip__field').hidden = !on;
+      } else s.el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
     requestAnimationFrame(measure);
   });
   addEventListener('resize', function () { requestAnimationFrame(measure); });
@@ -101,7 +128,10 @@
       sl.el.style.transform = 'translate3d(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px,0) rotate(' + rot.toFixed(2) + 'deg) scale(' + sc.toFixed(3) + ')';
       sl.el.style.opacity = op.toFixed(3);
       var off = g > 0.08;
-      if (off !== sl.off) { sl.off = off; sl.el.tabIndex = off ? -1 : 0; sl.el.style.pointerEvents = off ? 'none' : ''; }
+      if (off !== sl.off) {
+        sl.off = off; sl.el.style.pointerEvents = off ? 'none' : '';
+        sl.focusables.forEach(function (f) { if (f) f.tabIndex = off ? -1 : 0; });
+      }
     });
     reg.style.opacity = win(g, 0.62, 0.92).toFixed(3);
     reg.classList.toggle('is-on', g > 0.7);

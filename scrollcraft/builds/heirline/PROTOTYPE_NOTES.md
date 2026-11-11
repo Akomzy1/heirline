@@ -16,7 +16,7 @@ Logo files (unchanged SVGs, used at or above the 160px horizontal minimum), `css
 
 ## Decisions that need recording in the build pack if approved
 1. **Motion extension, website only** (owner decision, 11 Nov 2026). Scroll-linked choreography (pinned acts, layered parallax, a 4.0vh sealing sequence) is allowed on the website. UI transitions stay 200 to 300ms. Console and portal keep the original rule. Update `docs/03_UI_Fidelity_Spec.md` §3 Motion and the brand direction "Motion" line.
-2. **The register interaction** (signature move). Visitors may mark asset categories; the selection lives in `sessionStorage` only and pre-fills the consultation form's topics. No values, locations or names are collected. Needs a line in the privacy notice and DPIA.
+2. **The register interaction** (signature move). Visitors may mark ten common asset categories or add their own under "Something else" (a label of a word or two). The selection lives in `sessionStorage` only and pre-fills the consultation form's topics. The free-text label is never submitted, and no values, locations or names are collected. Needs a line in the privacy notice and DPIA.
 3. **Fixed footer notice** on fraud: "We will never ask you to send money, passwords or one-time codes."
 4. Phone number and `enquiries@heirline.ng` are **omitted**, per §7 item 7 (hide until real).
 5. "The sealed vault opens with the Heirline client portal" is shown because the vault is V1.

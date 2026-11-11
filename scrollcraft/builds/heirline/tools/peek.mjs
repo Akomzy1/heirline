@@ -17,6 +17,9 @@ await page.evaluate(() => document.fonts.ready);
 if (process.env.MARK) {
   await page.evaluate(ids => { ids.split(',').forEach(id => window.HL.toggle(id)); }, process.env.MARK);
 }
+if (process.env.OTHER) {
+  await page.evaluate(v => { window.HL.setOther(v); const i = document.getElementById('slip-other-in'); if (i) i.value = v; }, process.env.OTHER);
+}
 let n = 0;
 for (const sp of specs) {
   const [k, v] = sp.split(':');

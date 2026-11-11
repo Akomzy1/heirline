@@ -15,18 +15,24 @@
     { id: 'pension',   cat: 'Pension',       desc: 'An RSA from a first employer',    ref: 'PIN not to hand',          end: 'verified' },
     { id: 'policy',    cat: 'Policy',        desc: 'A life policy',                   ref: 'Insurer since merged',     end: 'evidenced' },
     { id: 'abroad',    cat: 'Abroad',        desc: 'A flat in London',                ref: 'Held in a company name',   end: 'verified' },
-    { id: 'stake',     cat: 'Private stake', desc: "A share in a friend's business",  ref: 'No certificate',           end: 'evidenced' },
-    { id: 'loan',      cat: 'Owed to you',   desc: 'Money lent to a cousin',          ref: 'Nothing in writing',       end: 'claimed' }
+    { id: 'rental',    cat: 'Property',      desc: 'Rental flats, Surulere',          ref: 'Rents collected by a relative', end: 'verified' },
+    { id: 'loan',      cat: 'Owed to you',   desc: 'Money lent to a cousin',          ref: 'Nothing in writing',       end: 'claimed' },
+    // the visitor's own entry: their words stay in this browser; only the topic is ever submitted
+    { id: 'other',     cat: 'Something else', desc: 'Something else',                 ref: 'In your own words',        end: 'evidenced', other: true }
   ];
   var EXAMPLE = ['lekki', 'shares', 'dividends', 'account', 'abroad'];
   var ORDER = { claimed: 0, evidenced: 1, verified: 2 };
   var LABEL = { claimed: 'Claimed', evidenced: 'Evidenced', verified: 'Verified', disputed: 'Disputed' };
   var KEY = 'hl-register-v1';
 
-  var state = { marked: [], stage: 0, sealed: false };
-  try { var saved = JSON.parse(sessionStorage.getItem(KEY) || 'null'); if (saved && Array.isArray(saved.marked)) state.marked = saved.marked.filter(byId); } catch (e) {}
+  var state = { marked: [], stage: 0, sealed: false, other: '' };
+  try {
+    var saved = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+    if (saved && Array.isArray(saved.marked)) state.marked = saved.marked.filter(byId);
+    if (saved && typeof saved.other === 'string') state.other = saved.other.slice(0, 40);
+  } catch (e) {}
   function byId(id) { return CATALOGUE.some(function (c) { return c.id === id; }); }
-  function save() { try { sessionStorage.setItem(KEY, JSON.stringify({ marked: state.marked })); } catch (e) {} }
+  function save() { try { sessionStorage.setItem(KEY, JSON.stringify({ marked: state.marked, other: state.other })); } catch (e) {} }
 
   var listeners = [];
   function emit() { listeners.forEach(function (fn) { fn(state); }); }
@@ -41,7 +47,10 @@
     var ids = isExample() ? EXAMPLE : state.marked;
     var s = stage == null ? state.stage : stage;
     return CATALOGUE.filter(function (c) { return ids.indexOf(c.id) !== -1; })
-      .map(function (c) { return { id: c.id, cat: c.cat, desc: c.desc, ref: c.ref, status: statusFor(c, s) }; });
+      .map(function (c) {
+        var desc = c.other && state.other.trim() ? state.other.trim() : c.desc;
+        return { id: c.id, cat: c.cat, desc: desc, ref: c.ref, status: statusFor(c, s) };
+      });
   }
 
   function esc(t) { return String(t).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
@@ -56,7 +65,7 @@
   function render(ol, opts) {
     opts = opts || {};
     var list = entries(opts.stage);
-    var ids = list.map(function (e) { return e.id; }).join(',');
+    var ids = list.map(function (e) { return e.id + ':' + e.desc; }).join('|');
     if (ol.getAttribute('data-ids') !== ids) {
       ol.innerHTML = list.map(function (e) { return rowHTML(e, opts.refs); }).join('');
       ol.setAttribute('data-ids', ids);
@@ -77,6 +86,7 @@
       state.marked.sort(function (a, b) { return idx(a) - idx(b); });
       save(); emit();
     },
+    setOther: function (label) { state.other = String(label || '').slice(0, 40); save(); emit(); },
     setStage: function (n) { if (state.stage !== n) { state.stage = n; emit(); } },
     setSealed: function (b) { if (state.sealed !== b) { state.sealed = b; emit(); } }
   };
@@ -169,10 +179,10 @@
     var topics = [
       ['land', 'Land and titles'], ['shares', 'Shares and dividends'], ['accounts', 'Dormant accounts'],
       ['pensions', 'Pensions and policies'], ['business', 'Business interests'], ['abroad', 'Assets abroad'],
-      ['heirs', 'Preparing heirs'], ['estate', 'An estate in probate']
+      ['heirs', 'Preparing heirs'], ['estate', 'An estate in probate'], ['other', 'Something else']
     ];
-    var fromCat = { 'Land': 'land', 'Shares': 'shares', 'Dividends': 'shares', 'Bank account': 'accounts', 'Pension': 'pensions',
-      'Policy': 'pensions', 'Abroad': 'abroad', 'Private stake': 'business', 'Owed to you': 'business' };
+    var fromCat = { 'Land': 'land', 'Property': 'land', 'Shares': 'shares', 'Dividends': 'shares', 'Bank account': 'accounts', 'Pension': 'pensions',
+      'Policy': 'pensions', 'Abroad': 'abroad', 'Owed to you': 'business', 'Something else': 'other' };
     chips.innerHTML = topics.map(function (t) {
       return '<label class="chip"><input type="checkbox" name="topics" value="' + t[0] + '"><span>' + t[1] + '</span></label>';
     }).join('');
@@ -184,7 +194,8 @@
       chips.querySelectorAll('input').forEach(function (i) { if (!i.dataset.touched) i.checked = !!want[i.value]; });
       if (intro) {
         var PHRASE = { 'Land': 'land', 'Shares': 'shares', 'Dividends': 'unclaimed dividends', 'Bank account': 'a bank account',
-          'Pension': 'a pension', 'Policy': 'a life policy', 'Abroad': 'assets abroad', 'Private stake': 'a private stake', 'Owed to you': 'money owed to you' };
+          'Pension': 'a pension', 'Policy': 'a life policy', 'Abroad': 'assets abroad', 'Property': 'rental property',
+          'Owed to you': 'money owed to you', 'Something else': 'something else' };
         var names = entries().map(function (e) { return PHRASE[e.cat]; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
         var list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
         intro.textContent = 'You marked ' + list + '. We would like to understand the rest of the picture, privately and at your pace. There is no obligation.';

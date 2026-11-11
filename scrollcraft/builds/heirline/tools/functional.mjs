@@ -25,6 +25,14 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
   // keyboard: slips are buttons reachable by Tab
   const focusable = await page.$eval('.slip', b => b.tabIndex >= 0);
   ok(`slips keyboard-focusable ${tag}`, focusable);
+  // "Something else": toggle, type a label, label shows in the register, then un-mark it again
+  await page.click('.slip--other .slip__toggle');
+  const inFocus = await page.evaluate(() => document.activeElement.id === 'slip-other-in');
+  await page.keyboard.type('Farmland in Ogun');
+  await page.waitForTimeout(150);
+  const rowText = await page.textContent('[data-ledger="scatter"]');
+  ok(`"Something else" opens a focused field and its label enters the register ${tag}`, inFocus && rowText.includes('Farmland in Ogun'));
+  await page.click('.slip--other .slip__toggle');
   // close: letter intro and chips reflect marks
   await page.evaluate(() => document.querySelector('#consultation').scrollIntoView());
   await page.waitForTimeout(400);
